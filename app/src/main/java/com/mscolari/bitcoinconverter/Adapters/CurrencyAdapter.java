@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.mscolari.bitcoinconverter.Models.Currency;
 import com.mscolari.bitcoinconverter.R;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class CurrencyAdapter extends RecyclerView.Adapter{
@@ -69,5 +70,12 @@ public class CurrencyAdapter extends RecyclerView.Adapter{
                 }
             });
         }
+    }
+
+    // filters recyclerview by search term
+    public void filterList(ArrayList<Currency> updatedList) {
+        currencyList = new ArrayList<Currency>();
+        currencyList.addAll(updatedList);
+        notifyDataSetChanged();
     }
 }

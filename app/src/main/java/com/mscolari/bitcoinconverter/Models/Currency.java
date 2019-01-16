@@ -22,15 +22,23 @@ import cz.msebera.android.httpclient.Header;
 public class Currency implements Parcelable {
     private String code;
     private String name;
+    private String price;
 
     public Currency(String code, String name) {
         this.code = code;
         this.name = name;
     }
 
+    public Currency(String code, String name, String price) {
+        this.code = code;
+        this.name = name;
+        this.price = price;
+    }
+
     protected Currency(Parcel in) {
         code = in.readString();
         name = in.readString();
+        price = in.readString();
     }
 
     public static final Creator<Currency> CREATOR = new Creator<Currency>() {
@@ -53,6 +61,8 @@ public class Currency implements Parcelable {
         return name;
     }
 
+    public String getPrice() { return price; }
+
     @Override
     public int describeContents() {
         return 0;
@@ -62,5 +72,6 @@ public class Currency implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(code);
         parcel.writeString(name);
+        parcel.writeString(price);
     }
 }

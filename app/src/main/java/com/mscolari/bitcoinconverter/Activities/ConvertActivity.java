@@ -1,7 +1,10 @@
 package com.mscolari.bitcoinconverter.Activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -18,6 +21,8 @@ import cz.msebera.android.httpclient.Header;
 public class ConvertActivity extends AppCompatActivity {
 
     private MoneyTextView tvConvert;
+    private ProgressBar progressBar;
+
     private Currency currency;
 
     @Override
@@ -30,6 +35,7 @@ public class ConvertActivity extends AppCompatActivity {
 
         // initialize views
         tvConvert = findViewById(R.id.activity_convert_tv_convert);
+        progressBar = findViewById(R.id.activity_convert_pb_progress);
 
         // make HTTP request for BTC -> currency conversion
         queryCurrency(currency.getCode(), "1");
@@ -55,17 +61,25 @@ public class ConvertActivity extends AppCompatActivity {
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
 
                     }
-
                 });
-
         return 0;
     }
 
     // INPUT: JSONObject with requested conversion information
     // OUTPUT: Output appropriate information to screen
     private void displayConversion(JSONObject response) throws JSONException {
-        if (response.getBoolean("success"))
+        if (response.getBoolean("success")) {
+            progressBar.setVisibility(View.GONE);
+            tvConvert.setVisibility(View.VISIBLE);
             tvConvert.setAmount(Float.valueOf(response.getString("price")));
             tvConvert.setSymbol(currency.getCode());
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        finish();
+
+        super.onStop();
     }
 }

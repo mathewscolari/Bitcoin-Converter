@@ -6,11 +6,16 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.*;
 import com.mscolari.bitcoinconverter.Adapters.CurrencyAdapter;
@@ -26,12 +31,13 @@ import java.util.ArrayList;
 import cz.msebera.android.httpclient.Header;
 
 public class SelectionActivity extends AppCompatActivity
-    implements CurrencyAdapter.OnItemClickListener{
+    implements CurrencyAdapter.OnItemClickListener, SearchView.OnQueryTextListener {
 
+    private ProgressBar progressBar;
     private RecyclerView rvCurrencies;
+
+    private ArrayList<Currency> currencyList;
     private CurrencyAdapter currencyAdapter;
-    private TextView tvDisplayText;
-    private Button btnConvert;
 
     public static final String TAG = "SelectionActivityLog";
     public static final String KEY = "CURRENCY";
@@ -41,8 +47,11 @@ public class SelectionActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
 
-        // initialize and fill recycler view with currency information
+        // initialize views
+        progressBar = findViewById(R.id.activity_selection_progress_bar);
         rvCurrencies = findViewById(R.id.activity_selection_rv_currencies);
+
+        // setup recycler view and fill with values
         rvCurrencies.setLayoutManager(new LinearLayoutManager(this));
         displayCurrencies();
 }
@@ -63,8 +72,7 @@ public class SelectionActivity extends AppCompatActivity
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         try {
                             JSONObject response = new JSONObject(new String(responseBody));
-                            ArrayList<Currency> currencyList =
-                                    convertCurrencyToList(response.getJSONObject("rates"));
+                            currencyList = convertCurrencyToList(response.getJSONObject("rates"));
                             buildList(currencyList);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -82,6 +90,8 @@ public class SelectionActivity extends AppCompatActivity
     // INPUT: list of currency objects
     // OUTPUT: fills recycler view with available currency
     private void buildList(ArrayList<Currency> currencies) {
+        progressBar.setVisibility(View.GONE);
+        rvCurrencies.setVisibility(View.VISIBLE);
         currencyAdapter = new CurrencyAdapter(currencies);
         rvCurrencies.setAdapter(currencyAdapter);
         currencyAdapter.setOnItemClickListener(this);
@@ -99,5 +109,42 @@ public class SelectionActivity extends AppCompatActivity
             currencyList.add(new Currency(names.getString(i), currCurrency.getString("name")));
         }
         return currencyList;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.action_menu_search);
+        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menuItem.getActionView();
+        searchView.setOnQueryTextListener(this);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        String searchQuery = s.toLowerCase();
+        ArrayList<Currency> filteredList = new ArrayList<>();
+
+        if (currencyList == null) {
+            Toast.makeText(getApplicationContext(), "No items to search. Please wait"
+                    , Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        for (Currency currency : currencyList) {
+            if ((currency.getName().toLowerCase().contains(searchQuery)) ||
+                    currency.getCode().toLowerCase().contains(searchQuery)) {
+                filteredList.add(currency);
+            }
+        }
+
+        currencyAdapter.filterList(filteredList);
+        return true;
     }
 }
