@@ -30,14 +30,12 @@ public class ConvertActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_convert);
 
-        // retrieve selected currency from last activity
-        currency = (Currency) getIntent().getExtras().get(SelectionActivity.KEY);
-
         // initialize views
         tvConvert = findViewById(R.id.activity_convert_tv_convert);
         progressBar = findViewById(R.id.activity_convert_pb_progress);
 
-        // make HTTP request for BTC -> currency conversion
+        // make HTTP request for conversion on selected currency
+        currency = (Currency) getIntent().getExtras().get(SelectionActivity.KEY);
         queryCurrency(currency.getCode(), "1");
     }
 
@@ -50,6 +48,7 @@ public class ConvertActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         try {
+                            // retrieve JSONObject from response and show on screen
                             JSONObject response = new JSONObject(new String(responseBody));
                             displayConversion(response);
                         } catch (JSONException e) {
@@ -68,6 +67,7 @@ public class ConvertActivity extends AppCompatActivity {
     // INPUT: JSONObject with requested conversion information
     // OUTPUT: Output appropriate information to screen
     private void displayConversion(JSONObject response) throws JSONException {
+        // remove loading animation and show price information
         if (response.getBoolean("success")) {
             progressBar.setVisibility(View.GONE);
             tvConvert.setVisibility(View.VISIBLE);
@@ -79,7 +79,6 @@ public class ConvertActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         finish();
-
         super.onStop();
     }
 }

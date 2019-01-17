@@ -35,8 +35,8 @@ public class CurrencyAdapter extends RecyclerView.Adapter{
 
         // Obtain reference to current list item and set views accordingly
         CurrencyViewHolder classViewHolder = (CurrencyViewHolder) viewHolder;
-        classViewHolder.tvCurrencyName.setText(currency.getName() +
-                "("+ currency.getCode() + ")");
+        classViewHolder.tvCurrencyName.setText(currency.getName());
+        classViewHolder.tvCode.setText(currency.getCode());
     }
 
     @Override
@@ -51,10 +51,12 @@ public class CurrencyAdapter extends RecyclerView.Adapter{
     public void setOnItemClickListener(OnItemClickListener listener) { clickListener = listener; }
 
     public class CurrencyViewHolder extends RecyclerView.ViewHolder {
+        public TextView tvCode;
         public TextView tvCurrencyName;
 
         public CurrencyViewHolder(View itemView) {
             super(itemView);
+            tvCode = itemView.findViewById(R.id.currency_item_tv_code);
             tvCurrencyName = itemView.findViewById(R.id.currency_item_tv_name);
 
             // pass selected class information to click listener

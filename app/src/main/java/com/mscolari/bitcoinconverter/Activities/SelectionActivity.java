@@ -1,6 +1,9 @@
 package com.mscolari.bitcoinconverter.Activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
@@ -39,6 +42,9 @@ public class SelectionActivity extends AppCompatActivity
     private ArrayList<Currency> currencyList;
     private CurrencyAdapter currencyAdapter;
 
+    private SharedPreferences sharedPreferences;
+    private String name;
+
     public static final String TAG = "SelectionActivityLog";
     public static final String KEY = "CURRENCY";
 
@@ -47,13 +53,25 @@ public class SelectionActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
 
-        // initialize views
-        progressBar = findViewById(R.id.activity_selection_progress_bar);
-        rvCurrencies = findViewById(R.id.activity_selection_rv_currencies);
+        // check shared preferences for stored name
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!nameExists()) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
+        else {
+            // show name found in shared preferences
+            Toast.makeText(this, "Hello, " + name + "!",
+                    Toast.LENGTH_LONG).show();
 
-        // setup recycler view and fill with values
-        rvCurrencies.setLayoutManager(new LinearLayoutManager(this));
-        displayCurrencies();
+            // initialize views
+            progressBar = findViewById(R.id.activity_selection_progress_bar);
+            rvCurrencies = findViewById(R.id.activity_selection_rv_currencies);
+
+            // setup recycler view and fill with values
+            rvCurrencies.setLayoutManager(new LinearLayoutManager(this));
+            displayCurrencies();
+        }
 }
 
     @Override
@@ -111,19 +129,23 @@ public class SelectionActivity extends AppCompatActivity
         return currencyList;
     }
 
+    // inflate search item in menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
-
         MenuItem menuItem = menu.findItem(R.id.action_menu_search);
+
         android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menuItem.getActionView();
         searchView.setOnQueryTextListener(this);
         return true;
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String s) {
-        return false;
+    // check shared preferences for stored name
+    private boolean nameExists() {
+        name = sharedPreferences.getString("Name", "");
+        if (name.equals(""))
+            return false;
+        return true;
     }
 
     @Override
@@ -131,12 +153,14 @@ public class SelectionActivity extends AppCompatActivity
         String searchQuery = s.toLowerCase();
         ArrayList<Currency> filteredList = new ArrayList<>();
 
+        // only perform search if dataset is non-empty
         if (currencyList == null) {
             Toast.makeText(getApplicationContext(), "No items to search. Please wait"
                     , Toast.LENGTH_LONG).show();
             return false;
         }
 
+        // retrieve all currencies that fit search query
         for (Currency currency : currencyList) {
             if ((currency.getName().toLowerCase().contains(searchQuery)) ||
                     currency.getCode().toLowerCase().contains(searchQuery)) {
@@ -147,4 +171,10 @@ public class SelectionActivity extends AppCompatActivity
         currencyAdapter.filterList(filteredList);
         return true;
     }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
 }
