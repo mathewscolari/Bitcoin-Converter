@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_convert_constraint"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -14,7 +15,7 @@
         app:symbolGravity="end|top"
         app:decimalGravity="bottom"
         app:decimalSeparator="."
-        app:decimalMargin="0sp"
+        app:decimalMargin="5sp"
         app:baseTextSize="50sp"
         app:symbolMargin="0sp"
         app:symbolTextSize="15sp"

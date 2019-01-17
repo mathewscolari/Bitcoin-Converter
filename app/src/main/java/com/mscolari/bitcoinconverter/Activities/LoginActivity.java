@@ -17,7 +17,6 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnSave;
 
     private SharedPreferences sharedPreferences;
-    public static final String PREF_KEY = "com.mscolari.bitcoinconverter";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
                 // switch to currency selection page
                 Intent intent = new Intent(view.getContext(), SelectionActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
@@ -36,6 +37,7 @@ import cz.msebera.android.httpclient.Header;
 public class SelectionActivity extends AppCompatActivity
     implements CurrencyAdapter.OnItemClickListener, SearchView.OnQueryTextListener {
 
+    private LinearLayoutCompat linearLayoutCompat;
     private ProgressBar progressBar;
     private RecyclerView rvCurrencies;
 
@@ -65,6 +67,7 @@ public class SelectionActivity extends AppCompatActivity
                     Toast.LENGTH_LONG).show();
 
             // initialize views
+            linearLayoutCompat = findViewById(R.id.activity_selection_linear_layout);
             progressBar = findViewById(R.id.activity_selection_progress_bar);
             rvCurrencies = findViewById(R.id.activity_selection_rv_currencies);
 
@@ -74,6 +77,7 @@ public class SelectionActivity extends AppCompatActivity
         }
 }
 
+    // switch to currency conversion activity
     @Override
     public void onItemClick(Currency currency) {
         Intent intent = new Intent(this, ConvertActivity.class);
@@ -99,7 +103,18 @@ public class SelectionActivity extends AppCompatActivity
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
+                        Snackbar snackbar = Snackbar
+                                .make(linearLayoutCompat, "Error receiving currency information.",
+                                        Snackbar.LENGTH_INDEFINITE).setAction("RETRY"
+                                        , new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        progressBar.setVisibility(View.VISIBLE);
+                                        rvCurrencies.setVisibility(View.GONE);
+                                        displayCurrencies();
+                                    }
+                                });
+                        snackbar.show();
                     }
 
                 });
@@ -108,8 +123,10 @@ public class SelectionActivity extends AppCompatActivity
     // INPUT: list of currency objects
     // OUTPUT: fills recycler view with available currency
     private void buildList(ArrayList<Currency> currencies) {
+        // remove progress bar, show list of currency
         progressBar.setVisibility(View.GONE);
         rvCurrencies.setVisibility(View.VISIBLE);
+
         currencyAdapter = new CurrencyAdapter(currencies);
         rvCurrencies.setAdapter(currencyAdapter);
         currencyAdapter.setOnItemClickListener(this);
@@ -135,7 +152,9 @@ public class SelectionActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
         MenuItem menuItem = menu.findItem(R.id.action_menu_search);
 
-        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menuItem.getActionView();
+        // assign search function to search icon in toolbar
+        android.support.v7.widget.SearchView searchView =
+                (android.support.v7.widget.SearchView) menuItem.getActionView();
         searchView.setOnQueryTextListener(this);
         return true;
     }
@@ -153,10 +172,11 @@ public class SelectionActivity extends AppCompatActivity
         String searchQuery = s.toLowerCase();
         ArrayList<Currency> filteredList = new ArrayList<>();
 
-        // only perform search if dataset is non-empty
+        // only perform search if data-set is non-empty
         if (currencyList == null) {
-            Toast.makeText(getApplicationContext(), "No items to search. Please wait"
-                    , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),
+                    "No items to search. Please wait for data to load",
+                    Toast.LENGTH_LONG).show();
             return false;
         }
 
@@ -167,7 +187,7 @@ public class SelectionActivity extends AppCompatActivity
                 filteredList.add(currency);
             }
         }
-
+        // display filtered data-set in recycler view
         currencyAdapter.filterList(filteredList);
         return true;
     }

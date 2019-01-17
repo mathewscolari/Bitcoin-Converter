@@ -19,6 +19,11 @@ import java.util.Iterator;
 
 import cz.msebera.android.httpclient.Header;
 
+/*
+* Holds both the name and abbreviated code for all currencies
+* Allows for passing to activities through intents with Parcelable
+ */
+
 public class Currency implements Parcelable {
     private String code;
     private String name;
